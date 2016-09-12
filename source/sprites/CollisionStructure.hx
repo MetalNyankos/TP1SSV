@@ -1,4 +1,4 @@
-package;
+package sprites;
 
 import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxGraphicAsset;
@@ -13,7 +13,6 @@ class CollisionStructure extends FlxSprite
 	public var life:Int = 3;
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) {
 		super(X, Y, SimpleGraphic);	
-		//makeGraphic(10, 5, 0xff00ff00);
 		loadGraphic(AssetPaths.Paredes__png, true, 16, 16);
 		
 		animation.add("pared1", [0], 8, false);
