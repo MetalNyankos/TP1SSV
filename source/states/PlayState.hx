@@ -19,12 +19,12 @@ class PlayState extends FlxState
 	private var invaders:FlxTypedGroup<Enemy>;
 	private var collisionStructureGroup:FlxTypedGroup<CollisionStructure>;
 	private var player:Player;
-	private var activeEnemyBullet:Bullet;
 	private var scoreText :FlxText;
 	private var highScoreText :FlxText;
 	private var livesCounter :FlxText;
 	public var movementTimer:FlxTimer;
 	public var invaderFiringTimer:FlxTimer;
+	private var victory:Bool = false;
 	private var score:Int = 0;
 	private var highscore:Int = 0;
 	
@@ -36,7 +36,6 @@ class PlayState extends FlxState
 		CreateStructures();
 		CreateHeaders();
 		InitializeTimers();
-		CreateHeaders();
 	}
 	
 	override public function update(elapsed:Float):Void
@@ -54,14 +53,6 @@ class PlayState extends FlxState
 		add(scoreText);
 		add(highScoreText);
 		add(livesCounter);
-	}
-	
-	public function InitializeTimers()
-	{
-		movementTimer = new FlxTimer();
-		invaderFiringTimer = new FlxTimer();
-		movementTimer.start(1, MoveInvaders, 0);
-		invaderFiringTimer.start(3, InvaderFires, 0);
 	}
 	
 	public function CreateInvaders():Void
@@ -122,6 +113,29 @@ class PlayState extends FlxState
 		add(collisionStructureGroup);
 	}
 	
+	public function UpdateScore():Void
+	{
+		scoreText.text = "S: " + score;
+	}
+	
+	public function UpdateHighScore():Void
+	{
+		highScoreText.text = "HS: " + highscore;
+	}
+	
+	public function UpdateLiveCounter():Void
+	{
+		livesCounter.text = "L: " + player.lives;
+	}
+	
+	public function InitializeTimers()
+	{
+		movementTimer = new FlxTimer();
+		invaderFiringTimer = new FlxTimer();
+		movementTimer.start(1, MoveInvaders, 0);
+		invaderFiringTimer.start(3, InvaderFires, 0);
+	}
+	
 	public function MoveInvaders(Timer:FlxTimer):Void
 	{
 		invaders.forEachAlive(_MoveInvaders);
@@ -147,14 +161,19 @@ class PlayState extends FlxState
 	
 	public function InvaderFires(Timer:FlxTimer):Void
 	{
-		var rnd:FlxRandom = new FlxRandom();
-		var rndInvader:Int = rnd.int(0, invaders.length);
-		var canFire = invaders.members[rndInvader].alive;
-		
-		if (canFire)
+		if(!victory)
 		{
+			var rnd:FlxRandom = new FlxRandom();
+			var rndInvader:Int = rnd.int(0, invaders.length - 1);
+			var canFire:Bool = invaders.members[rndInvader].alive;
+
+			while (!canFire)
+			{
+				rndInvader = rnd.int(0, invaders.length - 1);
+				canFire = invaders.members[rndInvader].alive;
+			}
+			
 			invaders.members[rndInvader].Fire();
-			activeEnemyBullet = invaders.members[rndInvader].GetBullet();
 		}
 	}
 	
@@ -162,20 +181,27 @@ class PlayState extends FlxState
 	{
 		var playerBullet:Bullet = player.GetBullet();
 		CheckStructureHit(playerBullet);
-		for (i in 0...invaders.length) {
+		for (i in 0...invaders.length) 
+		{
 			if (playerBullet != null){
 				if (FlxG.overlap(playerBullet, invaders.members[i])) {
 					player.destroyBullet();
 					score += invaders.members[i].pointValue;
-					scoreText.text = "Score: " + score;
+					UpdateScore();
+
 					if (score > highscore)
 					{
 						highscore = score;
-						highScoreText.text = "HS: " + highscore;
+						UpdateHighScore();
 					}
 					invaders.members[i].kill();
 				}
 			}
+		}
+		if (invaders.countLiving() == 0)
+		{
+			victory = true;
+			scoreText.text = "ganaste!";
 		}
 	}
 	
@@ -189,11 +215,11 @@ class PlayState extends FlxState
 				if (player.lives > 0)
 				{
 					player.lives--;
-					livesCounter.text = "L: " + player.lives;
+					UpdateLiveCounter();
 				}
 				else
 				{
-					player.destroy();
+					player.kill();
 				}
 			}
 		}
