@@ -11,7 +11,7 @@ import sprites.Bullet;
  */
 class Enemy extends FlxSprite
 {
-	public var xStep:Int = 1;
+	public var xStep:Int = Reg.invaderInitialXMoveRate;
 	public var bullet:Bullet;
 	public var pointValue:Int;
 	

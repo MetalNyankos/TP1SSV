@@ -26,10 +26,8 @@ class PlayState extends FlxState
 	private var movementTimer:FlxTimer;
 	private var invaderFiringTimer:FlxTimer;
 	private var victory:Bool = false;
-	private var lost:Bool = false;
 	private var score:Int = 0;
-	private var highscore:Int = 0;
-	private var invaderMoveRate:Float = 0.5;
+	private var invaderMoveRate:Float = Reg.invaderInitialTimerMoveRate;
 	
 	override public function create():Void
 	{
@@ -44,21 +42,19 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		if (!victory || !lost)
+		
+		if (player.bullet.alive)
 		{
-			if (player.bullet.alive)
-			{
-				CheckPlayerBulletHit();
-			}
-			
-			invaders.forEachAlive(CheckEnemyBulletHit);
-		}	
+			CheckPlayerBulletHit();
+		}
+		
+		invaders.forEachAlive(CheckEnemyBulletHit);
 	}
 	
 	public function CreateHeaders()
 	{
 		scoreText = new FlxText(0, 0, null, "S: " + score);
-		highScoreText = new FlxText(70, 0, null, "HS: " + highscore);
+		highScoreText = new FlxText(70, 0, null, "HS: " + Reg.highScore);
 		livesCounter = new FlxText(140, 0, null, "L: " + player.lives);
 		add(scoreText);
 		add(highScoreText);
@@ -131,7 +127,7 @@ class PlayState extends FlxState
 	
 	public function UpdateHighScore():Void
 	{
-		highScoreText.text = "HS: " + highscore;
+		highScoreText.text = "HS: " + Reg.highScore;
 	}
 	
 	public function UpdateLiveCounter():Void
@@ -165,7 +161,7 @@ class PlayState extends FlxState
 		
 		if (invader.ReachedEndOfScreen())
 		{
-			lost = true;
+			victory = false;
 			GameOver();
 		}
 	}
@@ -203,9 +199,9 @@ class PlayState extends FlxState
 				score += invaders.members[i].pointValue;
 				UpdateScore();
 
-				if (score > highscore)
+				if (score > Reg.highScore)
 				{
-					highscore = score;
+					Reg.highScore = score;
 					UpdateHighScore();
 				}
 				
@@ -239,6 +235,7 @@ class PlayState extends FlxState
 			else
 			{
 				player.kill();
+				victory = false;
 				GameOver();
 			}
 		}
@@ -278,6 +275,6 @@ class PlayState extends FlxState
 		highScoreText.destroy();
 		livesCounter.destroy();
 		
-		FlxG.switchState(new GameOverState());
+		FlxG.switchState(new GameOverState(victory,score));
 	}
 }

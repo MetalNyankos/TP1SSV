@@ -10,8 +10,8 @@ import sprites.Bullet;
  */
 class Player extends FlxSprite
 {
-	public var speed:Int = 3;
-	public var lives:Int = 3;
+	public var speed:Int = Reg.playerSpeed;
+	public var lives:Int = Reg.playerLives;
 	public var bullet:Bullet;
 	private var sceneBullet:Bool = false;
 	
