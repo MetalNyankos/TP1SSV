@@ -13,6 +13,7 @@ import sprites.Enemy;
 import sprites.Player;
 import sprites.CollisionStructure;
 import sprites.Bullet;
+import states.GameOverState;
 
 class PlayState extends FlxState
 {
@@ -22,11 +23,13 @@ class PlayState extends FlxState
 	private var scoreText :FlxText;
 	private var highScoreText :FlxText;
 	private var livesCounter :FlxText;
-	public var movementTimer:FlxTimer;
-	public var invaderFiringTimer:FlxTimer;
+	private var movementTimer:FlxTimer;
+	private var invaderFiringTimer:FlxTimer;
 	private var victory:Bool = false;
+	private var lost:Bool = false;
 	private var score:Int = 0;
 	private var highscore:Int = 0;
+	private var invaderMoveRate:Float = 0.5;
 	
 	override public function create():Void
 	{
@@ -41,8 +44,15 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		CheckPlayerBulletHit();
-		invaders.forEachAlive(CheckEnemyBulletHit);
+		if (!victory || !lost)
+		{
+			if (player.bullet.alive)
+			{
+				CheckPlayerBulletHit();
+			}
+			
+			invaders.forEachAlive(CheckEnemyBulletHit);
+		}	
 	}
 	
 	public function CreateHeaders()
@@ -61,18 +71,19 @@ class PlayState extends FlxState
 
 		var x:Int = 40;
 		var y:Int = 15;
-		var pointValue = 100;
+		var pointValue = 500;
 		
 		for ( i in 0...5)
 		{
-			for (j in 0...11)
+			for (j in 0...10)
 			{
-				var invader:Enemy = new Enemy(x, y, null, 100);
+				var invader:Enemy = new Enemy(x, y, null, pointValue);
 				invaders.add(invader);
 				x += 10;
 			}
 			x = 40;
 			y += 10;
+			pointValue -= 100;
 		}
 		
 		add(invaders);
@@ -132,7 +143,7 @@ class PlayState extends FlxState
 	{
 		movementTimer = new FlxTimer();
 		invaderFiringTimer = new FlxTimer();
-		movementTimer.start(1, MoveInvaders, 0);
+		movementTimer.start(invaderMoveRate, MoveInvaders, 0);
 		invaderFiringTimer.start(3, InvaderFires, 0);
 	}
 	
@@ -149,12 +160,17 @@ class PlayState extends FlxState
 			
 		if (reachedBorder)
 		{
-			invaders.forEachAlive(MoveBlockDownwards);
+			invaders.forEachAlive(MoveDownwards);
 		}
 		
+		if (invader.ReachedEndOfScreen())
+		{
+			lost = true;
+			GameOver();
+		}
 	}
 	 
-	public function MoveBlockDownwards(invader:Enemy):Void
+	public function MoveDownwards(invader:Enemy):Void
 	{
 		invader.MoveDownwards();
 	}
@@ -179,48 +195,51 @@ class PlayState extends FlxState
 	
 	public function CheckPlayerBulletHit():Void
 	{
-		var playerBullet:Bullet = player.GetBullet();
-		CheckStructureHit(playerBullet);
+		CheckStructureHit(player.bullet);
 		for (i in 0...invaders.length) 
 		{
-			if (playerBullet != null){
-				if (FlxG.overlap(playerBullet, invaders.members[i])) {
-					player.destroyBullet();
-					score += invaders.members[i].pointValue;
-					UpdateScore();
+			if (FlxG.overlap(player.bullet, invaders.members[i])) {
+				player.bullet.kill();
+				score += invaders.members[i].pointValue;
+				UpdateScore();
 
-					if (score > highscore)
-					{
-						highscore = score;
-						UpdateHighScore();
-					}
-					invaders.members[i].kill();
+				if (score > highscore)
+				{
+					highscore = score;
+					UpdateHighScore();
 				}
+				
+				invaders.members[i].kill();
+				
+				if (invaders.countLiving() % 10 == 0)
+				{
+					movementTimer.time /= 2;
+				}
+				
 			}
 		}
+		
 		if (invaders.countLiving() == 0)
 		{
 			victory = true;
-			scoreText.text = "ganaste!";
+			GameOver();
 		}
 	}
 	
 	public function CheckEnemyBulletHit(invader:Enemy):Void
 	{
-		var enemyBullet:Bullet = invader.GetBullet();
-		CheckStructureHit(enemyBullet);
-		if (enemyBullet != null){
-			if (FlxG.overlap(enemyBullet, player)) {
-				invader.destroyBullet();
-				if (player.lives > 0)
-				{
-					player.lives--;
-					UpdateLiveCounter();
-				}
-				else
-				{
-					player.kill();
-				}
+		CheckStructureHit(invader.bullet);
+		if (FlxG.overlap(invader.bullet, player)) {
+			invader.bullet.kill();
+			if (player.lives > 0)
+			{
+				player.lives--;
+				UpdateLiveCounter();
+			}
+			else
+			{
+				player.kill();
+				GameOver();
 			}
 		}
 	}
@@ -230,11 +249,35 @@ class PlayState extends FlxState
 		for (i in 0...collisionStructureGroup.length) {
 			if (bullet != null){
 				if (FlxG.overlap(bullet, collisionStructureGroup.members[i])) {
-					bullet.isActive = false;
-					bullet.destroy();
+					bullet.kill();
 					collisionStructureGroup.members[i].changeWall();
 				}
 			}
 		}
+	}
+	
+	public function GameOver():Void
+	{
+		remove(player);
+		player.destroyBullet();
+		player.destroy();
+		
+		remove(invaders);
+		for (i in 0...invaders.length)
+		{
+			invaders.members[i].destroyBullet();
+			invaders.members[i].destroy();
+		}
+		
+		remove(collisionStructureGroup);
+		for (i in 0...collisionStructureGroup.length) {
+			collisionStructureGroup.members[i].destroy();
+		}
+	
+		scoreText.destroy();
+		highScoreText.destroy();
+		livesCounter.destroy();
+		
+		FlxG.switchState(new GameOverState());
 	}
 }

@@ -11,8 +11,7 @@ import sprites.Bullet;
  */
 class Enemy extends FlxSprite
 {
-	private var isAlive:Bool = true;
-	private var xStep:Int = 1;
+	public var xStep:Int = 1;
 	public var bullet:Bullet;
 	public var pointValue:Int;
 	
@@ -21,6 +20,8 @@ class Enemy extends FlxSprite
 		super(X, Y, SimpleGraphic);
 		pointValue = val;
 		makeGraphic(5, 5);
+		bullet = new Bullet(null,null,null,-300);
+		bullet.kill();
 	}
 	
 	public function Move():Bool
@@ -37,27 +38,31 @@ class Enemy extends FlxSprite
 		return reachedBorder;
 	}
 	
+	public function ReachedEndOfScreen():Bool
+	{
+		var reachedEnd = false;
+		
+		if ((this.y - this.height) > (FlxG.height - 20) )
+		{
+			reachedEnd = true;
+		}
+		
+		return reachedEnd;
+	}
+	
 	public function MoveDownwards():Void
 	{
-		this.y += 5;
+		this.y += width;
 		xStep *= -1;
 	}
 	
-	public function GetBullet():Bullet
-	{
-		return bullet;
-	}
-	
 	public function destroyBullet():Void{
-		if (bullet != null) {
-			bullet.isActive = false;
-			bullet.destroy();
-		}
+		bullet.destroy();
 	}
 	
 	public function Fire():Void
 	{
-		bullet = new Bullet(null,null,null,-300);
+		bullet.revive();
 		bullet.x = this.x + width / 2 - bullet.width / 2;
 		bullet.y = this.y;
 		FlxG.state.add(bullet);

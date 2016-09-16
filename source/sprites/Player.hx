@@ -19,6 +19,8 @@ class Player extends FlxSprite
 		super(FlxG.width / 2, y, SimpleGraphic);
 		makeGraphic(10, 10, 0xff00ff00);
 		y = FlxG.height - this.height;
+		bullet = new Bullet(null, null, null, 300);
+		bullet.kill();
 	}
 
 	override public function update(elapsed:Float):Void {
@@ -33,29 +35,16 @@ class Player extends FlxSprite
 			x += speed;	
 		}
 		
-		if (FlxG.keys.justPressed.SPACE && sceneBullet == false ) {
-			bullet = new Bullet(null,null,null,300);
+		if (FlxG.keys.justPressed.SPACE && !bullet.alive) {
+			bullet.revive();
 			bullet.x = this.x + width / 2 - bullet.width / 2;
 			bullet.y = this.y;
-		
+			
 			FlxG.state.add(bullet);
-		}
-		
-		if(bullet != null) {	
-			sceneBullet = bullet.isActive;
-		}
-		
-	}
-	
-	public function GetBullet():Bullet
-	{
-		return bullet;
+		}		
 	}
 	
 	public function destroyBullet():Void{
-		if (bullet != null) {
-			bullet.isActive = false;
-			bullet.destroy();
-		}
+		bullet.destroy();
 	}
 }
