@@ -13,7 +13,7 @@ class CollisionStructure extends FlxSprite
 	public var life:Int = 3;
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) {
 		super(X, Y, SimpleGraphic);	
-		loadGraphic(AssetPaths.Paredes__png, true, 16, 16);
+		loadGraphic(AssetPaths.wall__png, true, 12, 5);
 		
 		animation.add("pared1", [0], 8, false);
 		animation.add("pared2", [1], 8, false);

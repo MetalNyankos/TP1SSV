@@ -4,6 +4,7 @@ import flixel.FlxSprite;
 import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.FlxG;
 import sprites.Bullet;
+import flixel.system.FlxSound;
 /**
  * ...
  * @author ...jms
@@ -14,10 +15,11 @@ class Player extends FlxSprite
 	public var lives:Int = Reg.playerLives;
 	public var bullet:Bullet;
 	private var sceneBullet:Bool = false;
+	private var bulletSound:FlxSound;
 	
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) { 
 		super(FlxG.width / 2, y, SimpleGraphic);
-		makeGraphic(10, 10, 0xff00ff00);
+		loadGraphic("assets/images/player.png");
 		y = FlxG.height - this.height;
 		bullet = new Bullet(null, null, null, 300);
 		bullet.kill();
@@ -37,6 +39,8 @@ class Player extends FlxSprite
 		
 		if (FlxG.keys.justPressed.SPACE && !bullet.alive) {
 			bullet.revive();
+			bulletSound = FlxG.sound.load(AssetPaths.Laser__wav);
+			bulletSound.play();
 			bullet.x = this.x + width / 2 - bullet.width / 2;
 			bullet.y = this.y;
 			

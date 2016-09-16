@@ -14,12 +14,14 @@ import sprites.Player;
 import sprites.CollisionStructure;
 import sprites.Bullet;
 import states.GameOverState;
+import sprites.SpecialEnemy;
 
 class PlayState extends FlxState
 {
 	private var invaders:FlxTypedGroup<Enemy>;
 	private var collisionStructureGroup:FlxTypedGroup<CollisionStructure>;
 	private var player:Player;
+	private var specialEnemy:SpecialEnemy;
 	private var scoreText :FlxText;
 	private var highScoreText :FlxText;
 	private var livesCounter :FlxText;
@@ -28,6 +30,7 @@ class PlayState extends FlxState
 	private var victory:Bool = false;
 	private var score:Int = 0;
 	private var invaderMoveRate:Float = Reg.invaderInitialTimerMoveRate;
+	private var checkTimeForSpecialEnemy:Int = 0;
 	
 	override public function create():Void
 	{
@@ -42,13 +45,22 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-		
+		checkTimeForSpecialEnemy++;
+		if (checkTimeForSpecialEnemy == 400){
+			CreateSpecialEnemy();
+			checkTimeForSpecialEnemy = -350;
+		}
 		if (player.bullet.alive)
 		{
 			CheckPlayerBulletHit();
 		}
 		
 		invaders.forEachAlive(CheckEnemyBulletHit);
+	}
+	
+	public function CreateSpecialEnemy():Void{
+		specialEnemy = new SpecialEnemy(1, 12, null, 1000,null);
+		add(specialEnemy);
 	}
 	
 	public function CreateHeaders()
@@ -66,16 +78,16 @@ class PlayState extends FlxState
 		invaders = new FlxTypedGroup<Enemy>();
 
 		var x:Int = 40;
-		var y:Int = 15;
+		var y:Int = 30;
 		var pointValue = 500;
 		
 		for ( i in 0...5)
 		{
-			for (j in 0...10)
+			for (j in 0...8)
 			{
-				var invader:Enemy = new Enemy(x, y, null, pointValue);
+				var invader:Enemy = new Enemy(x, y, null, pointValue,i);
 				invaders.add(invader);
-				x += 10;
+				x += 13;
 			}
 			x = 40;
 			y += 10;
@@ -95,7 +107,7 @@ class PlayState extends FlxState
 	public function CreateStructures()
 	{
 		collisionStructureGroup = new FlxTypedGroup<CollisionStructure>();	
-		var x:Int = 12, y:Int = 100, structureCount = 1, structureCountGroup = 1;
+		var x:Int = 11, y:Int = 112, structureCount = 1, structureCountGroup = 1;
 		
 		for (i in 0...18) {
 			
@@ -103,16 +115,16 @@ class PlayState extends FlxState
 			collisionStructureGroup.add(cs);
 			
 			structureCount++;
-			x += 10;
+			x += 12;
 			
 			if (structureCount == 4) {
 				structureCountGroup++;
 				structureCount = 1;
-				x += 20;
+				x += 15;
 			}
 			if(structureCountGroup == 4){
 				y += 5;
-				x = 12;
+				x = 11;
 				structureCount = 1;
 				structureCountGroup = 1;
 			}
@@ -192,6 +204,18 @@ class PlayState extends FlxState
 	public function CheckPlayerBulletHit():Void
 	{
 		CheckStructureHit(player.bullet);
+		
+		if (FlxG.overlap(player.bullet, specialEnemy)){
+			player.bullet.kill();
+			score += specialEnemy.pointValue;
+			UpdateScore();
+
+			if (score > Reg.highScore){
+				Reg.highScore = score;
+				UpdateHighScore();
+			}
+			specialEnemy.destroy();
+		}
 		for (i in 0...invaders.length) 
 		{
 			if (FlxG.overlap(player.bullet, invaders.members[i])) {
