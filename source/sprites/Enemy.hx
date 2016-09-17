@@ -87,7 +87,7 @@ class Enemy extends FlxSprite
 	}
 	override public function update(elapsed:Float):Void
 	{
-		if (enemySprite != null) {
+		if (enemySprite != 0) {
 			changeSprite++;
 			if (changeSprite == 30) {
 				if (status == 0) {

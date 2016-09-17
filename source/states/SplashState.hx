@@ -25,7 +25,7 @@ class SplashState extends FlxState
 		FlxG.camera.fade(FlxColor.BLACK, 1, true);
 		super.create();
 		splashTimer = new FlxTimer();
-		splash = new FlxText(0, (FlxG.height / 2) - 10, "SSV CREATIONS PRESENTS");
+		splash = new FlxText(0, (FlxG.height / 2) - 10, 0, "SSV CREATIONS PRESENTS");
 		splash.alignment = CENTER;
 		splash.screenCenter(X);
 		splash.color = 0xff00ffff;

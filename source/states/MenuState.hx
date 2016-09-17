@@ -54,7 +54,7 @@ class MenuState extends FlxState
 	
 	public function Splash()
 	{
-		var splash:FlxText = new FlxText("SSV CREATIONS PRESENTS");
+		var splash:FlxText = new FlxText(0,0,0,"SSV CREATIONS PRESENTS");
 		splash.alignment = CENTER;
 		splash.screenCenter(X);
 		splash.color = 0xff00ffff;

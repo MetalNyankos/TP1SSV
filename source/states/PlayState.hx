@@ -64,15 +64,15 @@ class PlayState extends FlxState
 	}
 	
 	public function CreateSpecialEnemy():Void{
-		specialEnemy = new SpecialEnemy(1, 12, null, 1000,null);
+		specialEnemy = new SpecialEnemy(1, 12, null, 1000, 0);
 		add(specialEnemy);
 	}
 	
 	public function CreateHeaders()
 	{
-		scoreText = new FlxText(0, 0, null, "S: " + score);
-		highScoreText = new FlxText(70, 0, null, "HS: " + Reg.highScore);
-		livesCounter = new FlxText(140, 0, null, "L: " + player.lives);
+		scoreText = new FlxText(0, 0, 0, "S: " + score);
+		highScoreText = new FlxText(70, 0, 0, "HS: " + Reg.highScore);
+		livesCounter = new FlxText(140, 0, 0, "L: " + player.lives);
 		add(scoreText);
 		add(highScoreText);
 		add(livesCounter);
