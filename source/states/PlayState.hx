@@ -15,6 +15,7 @@ import sprites.CollisionStructure;
 import sprites.Bullet;
 import states.GameOverState;
 import sprites.SpecialEnemy;
+import flixel.system.FlxSound;
 
 class PlayState extends FlxState
 {
@@ -31,6 +32,7 @@ class PlayState extends FlxState
 	private var score:Int = 0;
 	private var invaderMoveRate:Float = Reg.invaderInitialTimerMoveRate;
 	private var checkTimeForSpecialEnemy:Int = 0;
+	private var playerDied:FlxSound;
 	
 	override public function create():Void
 	{
@@ -205,7 +207,9 @@ class PlayState extends FlxState
 	{
 		CheckStructureHit(player.bullet);
 		
-		if (FlxG.overlap(player.bullet, specialEnemy)){
+		if (FlxG.overlap(player.bullet, specialEnemy)) {
+			playerDied = FlxG.sound.load(AssetPaths.Explosion__wav);
+			playerDied.play();
 			player.bullet.kill();
 			score += specialEnemy.pointValue;
 			UpdateScore();
@@ -218,24 +222,28 @@ class PlayState extends FlxState
 		}
 		for (i in 0...invaders.length) 
 		{
-			if (FlxG.overlap(player.bullet, invaders.members[i])) {
-				player.bullet.kill();
-				score += invaders.members[i].pointValue;
-				UpdateScore();
+			if(invaders.members[i].alive){
+				if (FlxG.pixelPerfectOverlap(player.bullet, invaders.members[i])) {
+					playerDied = FlxG.sound.load(AssetPaths.Explosion__wav);
+					playerDied.play();
+					player.bullet.kill();
+					score += invaders.members[i].pointValue;
+					UpdateScore();
 
-				if (score > Reg.highScore)
-				{
-					Reg.highScore = score;
-					UpdateHighScore();
+					if (score > Reg.highScore)
+					{
+						Reg.highScore = score;
+						UpdateHighScore();
+					}
+					
+					invaders.members[i].kill();
+					
+					if (invaders.countLiving() % 10 == 0)
+					{
+						movementTimer.time /= 2;
+					}
+					
 				}
-				
-				invaders.members[i].kill();
-				
-				if (invaders.countLiving() % 10 == 0)
-				{
-					movementTimer.time /= 2;
-				}
-				
 			}
 		}
 		
@@ -251,6 +259,11 @@ class PlayState extends FlxState
 		CheckStructureHit(invader.bullet);
 		if (FlxG.overlap(invader.bullet, player)) {
 			invader.bullet.kill();
+			player.spriteDestroyActive = true;
+			player.loadGraphic("assets/images/explosion.png");
+			player.checkSpriteDestroy = 100;
+			playerDied = FlxG.sound.load(AssetPaths.Explosion__wav);
+			playerDied.play();
 			if (player.lives > 0)
 			{
 				player.lives--;

@@ -16,6 +16,8 @@ class Player extends FlxSprite
 	public var bullet:Bullet;
 	private var sceneBullet:Bool = false;
 	private var bulletSound:FlxSound;
+	public var spriteDestroyActive:Bool = false;
+	public var checkSpriteDestroy:Int = 0;
 	
 	public function new(?X:Float=0, ?Y:Float=0, ?SimpleGraphic:FlxGraphicAsset) { 
 		super(FlxG.width / 2, y, SimpleGraphic);
@@ -27,7 +29,16 @@ class Player extends FlxSprite
 
 	override public function update(elapsed:Float):Void {
 		super.update(elapsed);
-		Movement();
+		if (spriteDestroyActive) {
+			checkSpriteDestroy--;
+			if (checkSpriteDestroy == 0) {
+				loadGraphic("assets/images/player.png");
+				spriteDestroyActive = false;
+			}
+		}else {
+			Movement();
+		}
+		
 	}
 	
 	public function Movement():Void {
