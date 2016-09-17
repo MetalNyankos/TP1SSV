@@ -31,6 +31,7 @@ class PlayState extends FlxState
 	private var score:Int = 0;
 	private var invaderMoveRate:Float = Reg.invaderInitialTimerMoveRate;
 	private var checkTimeForSpecialEnemy:Int = 0;
+	private var reachedBorder:Bool = false;
 	
 	override public function create():Void
 	{
@@ -162,14 +163,13 @@ class PlayState extends FlxState
 	
 	public function _MoveInvaders(invader:Enemy):Void
 	{
-		var reachedBorder:Bool = false;
-		
-		reachedBorder = invader.Move();
-			
 		if (reachedBorder)
 		{
 			invaders.forEachAlive(MoveDownwards);
+			CorrectFirstRow();
 		}
+		
+		reachedBorder = invader.Move();
 		
 		if (invader.ReachedEndOfScreen())
 		{
@@ -181,6 +181,21 @@ class PlayState extends FlxState
 	public function MoveDownwards(invader:Enemy):Void
 	{
 		invader.MoveDownwards();
+	}
+	
+	public function CorrectFirstRow():Void
+	{
+		for (i in 0...8)
+		{
+			if (invaders.members[i].xStep == 1)
+			{
+				invaders.members[i].x += 1;
+			}
+			else
+			{
+				invaders.members[i].x -= 1;
+			}
+		}
 	}
 	
 	public function InvaderFires(Timer:FlxTimer):Void
@@ -218,25 +233,28 @@ class PlayState extends FlxState
 		}
 		for (i in 0...invaders.length) 
 		{
-			if (FlxG.overlap(player.bullet, invaders.members[i])) {
-				player.bullet.kill();
-				score += invaders.members[i].pointValue;
-				UpdateScore();
+			if (invaders.members[i].alive)
+			{
+				if (FlxG.pixelPerfectOverlap(player.bullet, invaders.members[i])) {
+					player.bullet.kill();
+					score += invaders.members[i].pointValue;
+					UpdateScore();
 
-				if (score > Reg.highScore)
-				{
-					Reg.highScore = score;
-					UpdateHighScore();
+					if (score > Reg.highScore)
+					{
+						Reg.highScore = score;
+						UpdateHighScore();
+					}
+					
+					invaders.members[i].kill();
+					
+					if (invaders.countLiving() % 10 == 0)
+					{
+						movementTimer.time /= 2;
+					}
 				}
-				
-				invaders.members[i].kill();
-				
-				if (invaders.countLiving() % 10 == 0)
-				{
-					movementTimer.time /= 2;
-				}
-				
 			}
+			
 		}
 		
 		if (invaders.countLiving() == 0)

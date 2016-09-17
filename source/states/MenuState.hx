@@ -28,7 +28,7 @@ class MenuState extends FlxState
 		NameTxt.color = 0xff00ffff;
 		add(NameTxt);
 		
-		instructionsTxt = new FlxText(0, 60, 0, "MOVE WITH WASD\nFIRE WITH SPACEBAR\n", 8);
+		instructionsTxt = new FlxText(0, 60, 0, "MOVE WITH THE ARROW KEYS\nFIRE WITH SPACEBAR\n", 8);
 		instructionsTxt.alignment = CENTER;
 		instructionsTxt.screenCenter(X);
 		instructionsTxt.color = 0xff00ffff;
