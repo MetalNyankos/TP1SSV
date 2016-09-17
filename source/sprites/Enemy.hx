@@ -24,7 +24,6 @@ class Enemy extends FlxSprite
 	{
 		super(X, Y, SimpleGraphic);
 		pointValue = val;
-		//makeGraphic(5, 5);
 		enemySprite = sprite;
 		switch(enemySprite){
 			case 0:
@@ -44,13 +43,14 @@ class Enemy extends FlxSprite
 	{
 		var reachedBorder = false;
 		
-		this.x += xStep;
-		
 		if (((this.x + this.width) + xStep) > FlxG.width || (this.x + xStep) < 0)
 		{
 			reachedBorder = true;
+			return reachedBorder;
 		}
 		
+		this.x += xStep;
+		//Reg.t.play();
 		return reachedBorder;
 	}
 	
@@ -58,7 +58,7 @@ class Enemy extends FlxSprite
 	{
 		var reachedEnd = false;
 		
-		if ((this.y - this.height) > (FlxG.height - 20) )
+		if ((this.y - this.height) > (FlxG.height - 40) )
 		{
 			reachedEnd = true;
 		}
@@ -89,8 +89,8 @@ class Enemy extends FlxSprite
 	{
 		if (enemySprite != null) {
 			changeSprite++;
-			if (changeSprite == 30){
-				if (status == 0){
+			if (changeSprite == 30) {
+				if (status == 0) {
 					animation.play("enemy2");
 					status = 1;
 				} else {

@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.math.FlxMath;
 import states.PlayState;
+import flixel.system.FlxSound;
 
 /**
  * 
@@ -23,6 +24,7 @@ class GameOverState extends FlxState
 	private var replay:FlxButton;
 	private var _score:Int;
 	private var _victory:Bool;
+	private var themeSong:FlxSound;
 	
 	public function new(victory:Bool, score:Int) 
 	{
@@ -34,7 +36,9 @@ class GameOverState extends FlxState
 	override public function create():Void
 	{
 		super.create();
-
+		
+		themeSong = FlxG.sound.load(AssetPaths.song__wav, 1, true);
+		themeSong.play();
 		gameOver = new FlxText(20, 0, 0, "GAME\nOVER\n", 20);
 		gameOver.alignment = CENTER;
 		gameOver.screenCenter(X);

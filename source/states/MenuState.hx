@@ -10,6 +10,7 @@ import flixel.math.FlxMath;
 import flixel.util.FlxColor;
 import states.PlayState;
 import states.GameOverState;
+import flixel.system.FlxSound;
 
 class MenuState extends FlxState
 {	
@@ -17,10 +18,13 @@ class MenuState extends FlxState
 	private var NameTxt:FlxText;
 	private var instructionsTxt:FlxText;
 	private var play:FlxButton;
+	private var themeSong:FlxSound;
 
 	override public function create():Void
 	{		
+		themeSong = FlxG.sound.load(AssetPaths.song__wav,1,true);
 		FlxG.camera.fade(FlxColor.BLACK, 1, true);
+		themeSong.play();
 		super.create();
 		NameTxt = new FlxText(20, 0, 0, "SPACE\nINVADERS\n", 20);
 		NameTxt.alignment = CENTER;
@@ -28,7 +32,7 @@ class MenuState extends FlxState
 		NameTxt.color = 0xff00ffff;
 		add(NameTxt);
 		
-		instructionsTxt = new FlxText(0, 60, 0, "MOVE WITH WASD\nFIRE WITH SPACEBAR\n", 8);
+		instructionsTxt = new FlxText(0, 60, 0, "MOVE WITH THE ARROW KEYS\nFIRE WITH SPACEBAR\n", 8);
 		instructionsTxt.alignment = CENTER;
 		instructionsTxt.screenCenter(X);
 		instructionsTxt.color = 0xff00ffff;

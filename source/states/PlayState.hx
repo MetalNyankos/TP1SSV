@@ -31,8 +31,10 @@ class PlayState extends FlxState
 	private var victory:Bool = false;
 	private var score:Int = 0;
 	private var invaderMoveRate:Float = Reg.invaderInitialTimerMoveRate;
-	private var checkTimeForSpecialEnemy:Int = 0;
+	private var checkTimeForSpecialEnemy:Int = 0;  
 	private var playerDied:FlxSound;
+	private var reachedBorder:Bool = false;
+	private var moveSound:FlxSound;
 	
 	override public function create():Void
 	{
@@ -42,6 +44,7 @@ class PlayState extends FlxState
 		CreateStructures();
 		CreateHeaders();
 		InitializeTimers();
+		moveSound = FlxG.sound.load(AssetPaths.enemyMovement__wav);
 	}
 	
 	override public function update(elapsed:Float):Void
@@ -79,8 +82,8 @@ class PlayState extends FlxState
 	{
 		invaders = new FlxTypedGroup<Enemy>();
 
-		var x:Int = 40;
-		var y:Int = 30;
+		var x:Int = 20;
+		var y:Int = 25;
 		var pointValue = 500;
 		
 		for ( i in 0...5)
@@ -91,7 +94,7 @@ class PlayState extends FlxState
 				invaders.add(invader);
 				x += 13;
 			}
-			x = 40;
+			x = 20;
 			y += 10;
 			pointValue -= 100;
 		}
@@ -160,18 +163,18 @@ class PlayState extends FlxState
 	public function MoveInvaders(Timer:FlxTimer):Void
 	{
 		invaders.forEachAlive(_MoveInvaders);
+		moveSound.play();
 	}
 	
 	public function _MoveInvaders(invader:Enemy):Void
 	{
-		var reachedBorder:Bool = false;
-		
-		reachedBorder = invader.Move();
-			
 		if (reachedBorder)
 		{
 			invaders.forEachAlive(MoveDownwards);
+			CorrectFirstRow();
 		}
+		
+		reachedBorder = invader.Move();
 		
 		if (invader.ReachedEndOfScreen())
 		{
@@ -183,6 +186,21 @@ class PlayState extends FlxState
 	public function MoveDownwards(invader:Enemy):Void
 	{
 		invader.MoveDownwards();
+	}
+	
+	public function CorrectFirstRow():Void
+	{
+		for (i in 0...8)
+		{
+			if (invaders.members[i].xStep == 1)
+			{
+				invaders.members[i].x += 1;
+			}
+			else
+			{
+				invaders.members[i].x -= 1;
+			}
+		}
 	}
 	
 	public function InvaderFires(Timer:FlxTimer):Void
@@ -219,7 +237,8 @@ class PlayState extends FlxState
 				UpdateHighScore();
 			}
 			specialEnemy.destroy();
-		}
+		  }
+		
 		for (i in 0...invaders.length) 
 		{
 			if(invaders.members[i].alive){
@@ -241,10 +260,10 @@ class PlayState extends FlxState
 					if (invaders.countLiving() % 10 == 0)
 					{
 						movementTimer.time /= 2;
-					}
-					
+					}		
 				}
 			}
+			
 		}
 		
 		if (invaders.countLiving() == 0)
